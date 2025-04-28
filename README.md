@@ -1,5 +1,7 @@
 # Gimme token
 
+Get Bearer token from aws amplify but conveniently!
+
 ### Usage
 
 Gimme token using `default` profile:
