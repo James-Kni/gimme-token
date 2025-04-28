@@ -1,12 +1,12 @@
 {
   "name": "gimme-token",
   "module": "src/index.ts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "private": true,
   "scripts": {
     "start": "bun run ./src/index.ts",
-    "build": "bun build ./src/index.ts --compile --outfile out/gimme-token"
+    "build": "bun build --compile --minify --outfile out/gimme-token ./src/index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
