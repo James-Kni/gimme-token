@@ -1,8 +1,20 @@
-[user]
-username = ""
-password = ""
+# By default the `default` profile will be used.
+# Here you are able to override this.
+default = "my_profile"
 
-[aws]
-region = ""
-userPool = ""
-clientId = ""
+# Default profile
+[profile.default]
+user.username = ""
+user.password = ""
+
+aws.userPool = ""
+aws.clientId = ""
+
+# Define a custom profile which can be referenced with `--profile <name>`
+[profile.my_profile]
+user.username = ""
+user.password = ""
+
+aws.region = ""
+aws.userPool = ""
+aws.clientId = ""

@@ -1,9 +1,9 @@
-import { TOML } from 'bun';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { TOML } from "bun";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
-import z, { ZodError } from 'zod';
+import z, { ZodError } from "zod";
 
-const GimmeConfigSchema = z.object({
+const ProfileSchema = z.object({
   user: z.object({
     username: z.string(),
     password: z.string(),
@@ -13,6 +13,11 @@ const GimmeConfigSchema = z.object({
     userPool: z.string(),
     clientId: z.string(),
   }),
+});
+
+const GimmeConfigSchema = z.object({
+  default: z.string().default("default"),
+  profile: z.record(z.string(), ProfileSchema),
 });
 
 export type GimmeConfig = z.infer<typeof GimmeConfigSchema>;
@@ -28,16 +33,18 @@ const getConfigPath = () => {
   } else {
     throw new Error("Unable to find config location");
   }
-}
+};
 
 const ensureConfigExists = (path: string) => {
-  if (!existsSync(path)) {
-    mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, "", "utf8");
-    console.log(`Empty config file created at ${path}`);
-    console.log("You should probably edit this.");
-    process.exit(1);
+  if (existsSync(path)) {
+    return;
   }
+
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, "", "utf8");
+  console.log(`Empty config file created at ${path}`);
+  console.log("You should probably edit this.");
+  process.exit(0);
 };
 
 export const loadConfig = (): GimmeConfig => {
@@ -52,8 +59,7 @@ export const loadConfig = (): GimmeConfig => {
     const validatedConfig = GimmeConfigSchema.parse(configData);
     return validatedConfig;
   } catch (error) {
-    console.log(z.prettifyError(error as ZodError))
-    process.exit(1);
+    console.log(z.prettifyError(error as ZodError));
+    process.exit(0);
   }
-
-}
+};
