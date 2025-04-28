@@ -1,6 +1,7 @@
 import { Amplify, Auth } from "aws-amplify";
-import { loadConfig } from "./load-config";
 import { parseArgs } from "util";
+import { loadConfig } from "./load-config";
+import pkjson from '../package.json';
 
 const config = loadConfig();
 const defaultKey = config.default;
@@ -12,13 +13,18 @@ const { values } = parseArgs({
       type: "string",
       short: "p",
     },
-    verbose: {
+    version: {
       type: "boolean",
-      short: "v",
+      short: "V",
     },
   },
   allowPositionals: true,
 });
+
+if (values.version) {
+  console.log(`Version: ${pkjson.version}`);
+  process.exit(0);
+}
 
 const key = values.profile || defaultKey;
 const profile = config.profile[key];
