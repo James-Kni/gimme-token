@@ -1,0 +1,21 @@
+{
+  "name": "gimme-token",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run ./src/index.ts",
+    "build": "bun build ./src/index.ts --compile --outfile out/gimme-token"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@aws-amplify/auth": "5.6.15",
+    "aws-amplify": "^5.0.22",
+    "zod": "^4.0.0-beta.20250424T163858"
+  }
+}

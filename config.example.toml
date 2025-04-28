@@ -1,0 +1,8 @@
+[user]
+username = ""
+password = ""
+
+[aws]
+region = ""
+userPool = ""
+clientId = ""
