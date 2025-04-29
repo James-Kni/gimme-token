@@ -1,6 +1,6 @@
 import { Amplify, Auth } from "aws-amplify";
 import { parseArgs } from "util";
-import { loadProfile } from "./load-config";
+import { loadProfile } from "./load-profile";
 import pkjson from '../package.json';
 import { tryCatch } from './utils/try-catch';
 
