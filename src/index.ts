@@ -1,10 +1,8 @@
 import { Amplify, Auth } from "aws-amplify";
 import { parseArgs } from "util";
-import { loadConfig } from "./load-config";
+import { loadProfile } from "./load-config";
 import pkjson from '../package.json';
-
-const config = loadConfig();
-const defaultKey = config.default;
+import { tryCatch } from './utils/try-catch';
 
 const { values } = parseArgs({
   args: Bun.argv,
@@ -26,30 +24,26 @@ if (values.version) {
   process.exit(0);
 }
 
-const key = values.profile || defaultKey;
-const profile = config.profile[key];
-
-if (!profile) {
-  console.log(`Profile '${key}' is not defined`);
-  Object.keys(config.profile).forEach((profile) => {
-    console.log(`- ${profile}`);
-  });
-  process.exit(0);
-}
+const profile = await loadProfile(values.profile)
 
 Amplify.configure({
   Auth: {
     mandatorySignIn: true,
-    region: profile.aws.region,
-    userPoolId: profile.aws.userPool,
-    userPoolWebClientId: profile.aws.clientId,
+    region: profile.awsRegion,
+    userPoolId: profile.awsUserPool,
+    userPoolWebClientId: profile.awsClientId,
   },
 });
 
-await Auth.signIn({
-  username: profile.user.username,
-  password: profile.user.password,
-});
+const { error } = await tryCatch(Auth.signIn({
+  username: profile.username,
+  password: profile.password,
+}));
+
+if (error) {
+  console.error("[ERROR] Unable to authenticate with provided profile")
+  process.exit(0);
+}
 
 const token = await Auth.currentAuthenticatedUser().then(
   (u) => `Bearer ${u.signInUserSession?.idToken?.jwtToken}`,

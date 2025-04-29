@@ -2,25 +2,23 @@ import { TOML } from "bun";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import z, { ZodError } from "zod";
+import { tryCatch } from "./utils/try-catch";
 
 const ProfileSchema = z.object({
-  user: z.object({
-    username: z.string(),
-    password: z.string(),
-  }),
-  aws: z.object({
-    region: z.string().default("eu-west-2"),
-    userPool: z.string(),
-    clientId: z.string(),
-  }),
+  username: z.string(),
+  password: z.string(),
+  awsRegion: z.string(),
+  awsUserPool: z.string(),
+  awsClientId: z.string(),
 });
 
 const GimmeConfigSchema = z.object({
-  default: z.string().default("default"),
-  profile: z.record(z.string(), ProfileSchema),
+  default_profile: z.string().default("default"),
+  profile: z.record(z.string(), ProfileSchema.partial()),
 });
 
 export type GimmeConfig = z.infer<typeof GimmeConfigSchema>;
+export type Profile = z.infer<typeof ProfileSchema>;
 
 const getConfigPath = () => {
   const xdgConfig = process.env.XDG_CONFIG_HOME;
@@ -31,7 +29,8 @@ const getConfigPath = () => {
   } else if (home) {
     return join(home, ".config", "gimme-token", "config.toml");
   } else {
-    throw new Error("Unable to find config location");
+    console.error("[ERROR] Unable to find config location");
+    process.exit(0);
   }
 };
 
@@ -47,7 +46,7 @@ const ensureConfigExists = (path: string) => {
   process.exit(0);
 };
 
-export const loadConfig = (): GimmeConfig => {
+export const loadProfile = async (profileKey?: string): Promise<Profile> => {
   const path = getConfigPath();
 
   ensureConfigExists(path);
@@ -55,11 +54,38 @@ export const loadConfig = (): GimmeConfig => {
   const content = readFileSync(path, "utf8");
   const configData = TOML.parse(content);
 
-  try {
-    const validatedConfig = GimmeConfigSchema.parse(configData);
-    return validatedConfig;
-  } catch (error) {
-    console.log(z.prettifyError(error as ZodError));
+  const { data: config, error: configError } = await tryCatch<
+    GimmeConfig,
+    ZodError
+  >(GimmeConfigSchema.parseAsync(configData));
+
+  if (configError) {
+    console.error(z.prettifyError(configError as ZodError));
     process.exit(0);
   }
+
+  if ( profileKey && !config.profile[profileKey]) {
+    console.log(`Profile '${profileKey}' is not defined`);
+    Object.keys(config.profile).forEach((profile) => {
+      console.log(`- ${profile}`);
+    });
+    process.exit(0);
+  }
+
+  const mergedProfile = {
+    ...config.profile[config.default_profile],
+    ...(profileKey ? config.profile[profileKey] : []),
+  };
+
+  const { data: profile, error: profileError } = await tryCatch<
+    Profile,
+    ZodError
+  >(ProfileSchema.parseAsync(mergedProfile));
+
+  if (profileError) {
+    console.error(z.prettifyError(profileError));
+    process.exit(0);
+  }
+
+  return profile;
 };
