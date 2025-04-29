@@ -17,8 +17,8 @@ const GimmeConfigSchema = z.object({
   profile: z.record(z.string(), ProfileSchema.partial()),
 });
 
-export type GimmeConfig = z.infer<typeof GimmeConfigSchema>;
-export type Profile = z.infer<typeof ProfileSchema>;
+type GimmeConfig = z.infer<typeof GimmeConfigSchema>;
+type Profile = z.infer<typeof ProfileSchema>;
 
 const getConfigPath = () => {
   const xdgConfig = process.env.XDG_CONFIG_HOME;
