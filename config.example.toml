@@ -1,20 +1,27 @@
 # By default the `default` profile will be used.
 # Here you are able to override this.
-default = "my_profile"
+default_profile = "default"
 
-# Default profile
+# The default profile is used when no arguments are provided,
+# or as a base for other profiles.
 [profile.default]
-user.username = ""
-user.password = ""
+username = ""
+password = ""
 
-aws.userPool = ""
-aws.clientId = ""
+awsRegion = ""
+awsUserPool = ""
+awsClientId = ""
 
 # Define a custom profile which can be referenced with `--profile <name>`
 [profile.my_profile]
-user.username = ""
-user.password = ""
+username = ""
+password = ""
 
-aws.region = ""
-aws.userPool = ""
-aws.clientId = ""
+awsRegion = ""
+awsUserPool = ""
+awsClientId = ""
+
+# You can define a partial profile as long as the remaining
+# fields will be covered by the `default` profile.
+[profile.my_partial]
+username = ""
